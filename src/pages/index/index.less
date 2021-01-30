@@ -1,0 +1,45 @@
+page {
+    background-color: #f7f8f9;
+}
+.photo_list {
+    padding: 25rpx;
+    .photo_item {
+        width: 700px;
+        height: 400px;
+        overflow: hidden;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        position: relative;
+        .mask {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 700px;
+            height: 400px;
+            z-index: 1;
+            background-image: linear-gradient(0deg, rgba(0, 0, 0, .6) 0%, rgba(0, 0, 0, 0) 100%);
+
+        }
+        .title {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 650px;
+            padding: 25px;
+            z-index: 2;
+            font-size: 40px;
+            font-weight: 500;
+            color: #fff;
+        }
+        .thumb {
+            width: 700px;
+            height: 400px;
+        }
+    }
+    .ad_item {
+       width: 700px;
+       overflow: hidden;
+       border-radius: 10px;
+       margin-bottom: 25px;
+    }
+}
