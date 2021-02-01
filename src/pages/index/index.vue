@@ -1,11 +1,13 @@
 <template>
   <view class="index">
       <view class="photo_list">
-        <view class="photo_item" v-for="(item,index) in photos" :key="item.id" @tap="goDetail(item.id)"> 
-          <view class="title">{{item.title}}</view>
-          <view class="mask"></view>
-          <image class="thumb" mode="aspectFill" :src="item.thumb" />
-          
+        <view class="photo_item_main" v-for="(item,index) in photos" :key="item.id" @tap="goDetail(item.id)"> 
+          <view class="photo_item">
+            <view class="title">{{item.title}}</view>
+            <view class="mask"></view>
+            <image class="thumb" mode="aspectFill" :src="item.thumb" />
+          </view>
+            
           <view class="ad_item" v-if="index == 0 || index == 6"> 
             <ad unit-id="adunit-676cce9ac4d3b8bf"></ad>
           </view>
@@ -30,7 +32,35 @@ export default {
       loading: false,
     }
   },
-  
+  onLoad() {
+
+    // 在页面中定义插屏广告
+    let interstitialAd = null;
+
+    // 在页面onLoad回调事件中创建插屏广告实例
+    if (wx.createInterstitialAd) {
+      interstitialAd = wx.createInterstitialAd({
+        adUnitId: "adunit-99a1a16556dcdfcc",
+      });
+      interstitialAd.onLoad(() => {});
+      interstitialAd.onError((err) => {});
+      interstitialAd.onClose(() => {});
+    }
+
+    // 在适合的场景显示插屏广告
+    if (interstitialAd) {
+      interstitialAd.show().catch((err) => {
+        console.error(err);
+      });
+    }
+  },
+  onShow() {
+    this.getPhotos();
+  },
+  onPullDownRefresh() {
+    this.page = 1
+    this.getPhotos();
+  },
   onReachBottom() {
     this.getPhotos();
   },
@@ -43,7 +73,7 @@ export default {
     };
   },
   mounted(){
-    this.getPhotos()
+    // this.getPhotos()
   },
   methods: {
     goDetail(id){
@@ -54,9 +84,14 @@ export default {
     getPhotos() {
       if (!this.loading) {
         this.loading = true;
+        Taro.showLoading({
+          title: '加载中',
+        })
         Taro.request({
           url: serverUrl + '?c=photos&page=' + this.page,
         }).then((res) => {
+          Taro.hideLoading()
+          Taro.stopPullDownRefresh()
           if (res.data.success) {
             if (this.page == 1) {
               this.photos = res.data.photos;

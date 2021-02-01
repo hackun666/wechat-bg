@@ -24,7 +24,8 @@
       <view class="ad_item">
         <ad unit-id="adunit-676cce9ac4d3b8bf"></ad>
       </view>
-      <view class="download" @tap="download">复制文件链接</view>
+      <view class="download" v-if="info.type == 1" @tap="preview(info.link)">点击图片长按保存</view>
+      <view class="download" v-if="info.type == 2" @tap="download">复制文件下载链接</view>
 
       <view class="ad_item">
         <ad
@@ -51,10 +52,15 @@ export default {
     };
   },
 
-  onShareAppMessage() {},
+  onShareAppMessage() {
+    return {
+      title: this.info.title,
+      imageUrl: this.info.thumb,
+    };
+  },
   onShareTimeline() {
     return {
-      title: "微信8.0在线状态个性图片",
+      title: this.info.title,
       imageUrl: this.info.thumb,
       query: "id=" + this.id,
     };
@@ -102,6 +108,14 @@ export default {
       //   }
       // })
 
+      // Taro.saveFile({
+      //   tempFilePath: this.info.link,
+      //   success: function (res) {
+      //     var savedFilePath = res.savedFilePath
+      //     console.log(savedFilePath)
+      //   }
+      // })
+
       Taro.setClipboardData({
         data: this.info.link,
         success: function (res) {
@@ -128,6 +142,9 @@ export default {
         url: serverUrl + "?c=detail&id=" + id,
       }).then((res) => {
         if (res.data.success) {
+          Taro.setNavigationBarTitle({
+              title: res.data.info.title
+          })
           this.info = res.data.info;
           this.content = res.data.info.content.replace(
             /\<img/gi,

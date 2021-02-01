@@ -1,3 +1,4 @@
 export default {
-  navigationBarTitleText: '首页'
+  navigationBarTitleText: '最新素材',
+  enablePullDownRefresh: true
 }
