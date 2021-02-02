@@ -40,5 +40,25 @@
         "minifyWXSS": true
     },
     "compileType": "miniprogram",
-    "condition": {}
+    "condition": {
+        "plugin": {
+            "list": []
+        },
+        "game": {
+            "list": []
+        },
+        "gamePlugin": {
+            "list": []
+        },
+        "miniprogram": {
+            "list": [
+                {
+                    "name": "pages/show/show",
+                    "pathName": "pages/show/show",
+                    "query": "id=23&__key_=16122590679331",
+                    "scene": null
+                }
+            ]
+        }
+    }
 }

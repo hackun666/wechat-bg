@@ -17,15 +17,13 @@
           v-if="info.type == 2"
           controls="true"
           :poster="info.thumb"
-          loop="false"
-          muted="false"
         />
       </view>
       <view class="ad_item">
         <ad unit-id="adunit-676cce9ac4d3b8bf"></ad>
       </view>
       <view class="download" v-if="info.type == 1" @tap="preview(info.link)">点击图片长按保存</view>
-      <view class="download" v-if="info.type == 2" @tap="download">复制文件下载链接</view>
+      <view class="download" v-if="info.type == 2" @tap="download">点击保存到相册</view>
 
       <view class="ad_item">
         <ad
@@ -89,6 +87,34 @@ export default {
         console.error(err);
       });
     }
+
+
+    // // 在页面中定义激励视频广告
+    // let videoAd = null
+
+    // // 在页面onLoad回调事件中创建激励视频广告实例
+    // if (wx.createRewardedVideoAd) {
+    //   videoAd = wx.createRewardedVideoAd({
+    //     adUnitId: 'adunit-fba5c4dd65498d8c'
+    //   })
+    //   videoAd.onLoad(() => {})
+    //   videoAd.onError((err) => {})
+    //   videoAd.onClose((res) => {})
+    // }
+
+    // // 用户触发广告后，显示激励视频广告
+    // if (videoAd) {
+    //   videoAd.show().catch(() => {
+    //     // 失败重试
+    //     videoAd.load()
+    //       .then(() => videoAd.show())
+    //       .catch(err => {
+    //         console.log('激励视频 广告显示失败')
+    //       })
+    //   })
+    // }
+
+
   },
   methods: {
     preview(src) {
@@ -98,44 +124,86 @@ export default {
       });
     },
     download() {
-      // Taro.downloadFile({
-      //   url: this.info.link, //仅为示例，并非真实的资源
+   
+
+
+      wx.downloadFile({
+      url: this.info.link,//图片地址
+      success: function (res) {
+        //图片保存到本地
+        wx.saveVideoToPhotosAlbum({
+          filePath: res.tempFilePath,
+          success: function (data) {
+            wx.hideLoading()
+            wx.showModal({
+              title: '提示',
+              content: '视频文件已保存到相册',
+              showCancel: false,
+            })
+          },
+          fail: function (err) {
+            if (err.errMsg === "saveVideoToPhotosAlbum:fail:auth denied" || err.errMsg === "saveVideoToPhotosAlbum:fail auth deny" || err.errMsg === "saveVideoToPhotosAlbum:fail authorize no response") {
+              // 这边微信做过调整，必须要在按钮中触发，因此需要在弹框回调中进行调用
+              wx.showModal({
+                title: '提示',
+                content: '需要您授权保存相册',
+                showCancel: false,
+                success: modalSuccess => {
+                  wx.openSetting({
+                    success(settingdata) {
+                      console.log("settingdata", settingdata)
+                      if (settingdata.authSetting['scope.writePhotosAlbum']) {
+                        wx.showModal({
+                          title: '提示',
+                          content: '获取权限成功,再次点击即可保存',
+                          showCancel: false,
+                        })
+                      } else {
+                        wx.showModal({
+                          title: '提示',
+                          content: '获取权限失败，将无法保存到相册哦~',
+                          showCancel: false,
+                        })
+                      }
+                    },
+                    fail(failData) {
+                      console.log("failData", failData)
+                    },
+                    complete(finishData) {
+                      console.log("finishData", finishData)
+                    }
+                  })
+                }
+              })
+            }
+          },
+          complete(res) {
+            wx.hideLoading()
+          }
+        })
+      }
+    })
+
+      // Taro.setClipboardData({
+      //   data: this.info.link,
       //   success: function (res) {
-      //     // 只要服务器有响应数据，就会把响应内容写入文件并进入 success 回调，业务需要自行判断是否下载到了想要的内容
-      //     if (res.statusCode === 200) {
-
-      //     }
-      //   }
-      // })
-
-      // Taro.saveFile({
-      //   tempFilePath: this.info.link,
-      //   success: function (res) {
-      //     var savedFilePath = res.savedFilePath
-      //     console.log(savedFilePath)
-      //   }
-      // })
-
-      Taro.setClipboardData({
-        data: this.info.link,
-        success: function (res) {
-          Taro.getClipboardData({
-            success: function (res) {
-              Taro.showModal({
-                title: "复制成功",
-                content: "请到浏览器中粘贴访问下载",
-                success: function (res) {
-                  if (res.confirm) {
-                    console.log("用户点击确定");
-                  } else if (res.cancel) {
-                    console.log("用户点击取消");
-                  }
-                },
-              });
-            },
-          });
-        },
-      });
+      //     Taro.getClipboardData({
+      //       success: function (res) {
+      //         Taro.showModal({
+      //           title: "复制成功",
+      //           content: "请到浏览器中粘贴访问下载",
+      //           success: function (res) {
+      //             if (res.confirm) {
+      //               console.log("用户点击确定");
+      //             } else if (res.cancel) {
+      //               console.log("用户点击取消");
+      //             }
+      //           },
+      //         });
+      //       },
+      //     });
+      //   },
+      // });
     },
     getDetail(id) {
       Taro.request({
