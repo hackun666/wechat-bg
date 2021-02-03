@@ -22,8 +22,12 @@
       <!-- <view class="ad_item">
         <ad unit-id="adunit-676cce9ac4d3b8bf"></ad>
       </view> -->
-      <view class="download" v-if="info.type == 1" @tap="preview(info.link)">点击图片长按保存</view>
-      <view class="download" v-if="info.type == 2" @tap="download">点击保存到相册</view>
+      <view class="download" v-if="info.type == 1" @tap="preview(info.link)"
+        >点击图片长按保存</view
+      >
+      <view class="download" v-if="info.type == 2" @tap="download"
+        >点击保存到相册</view
+      >
 
       <view class="ad_item">
         <ad
@@ -40,7 +44,7 @@
 import Taro from "@tarojs/taro";
 import { serverUrl } from "../../utils/config";
 import "./show.less";
-let videoAd = null
+let videoAd = null;
 export default {
   data() {
     return {
@@ -88,24 +92,21 @@ export default {
       });
     }
 
-   // 在页面onLoad回调事件中创建激励视频广告实例
-      if (wx.createRewardedVideoAd) {
-        videoAd = wx.createRewardedVideoAd({
-          adUnitId: 'adunit-fba5c4dd65498d8c'
-        })
-        videoAd.onLoad(() => {})
-        videoAd.onError((err) => {})
-        videoAd.onClose((res) => {
-          if (res && res.isEnded) {
-              this.downloadFile()
-            } else {
-              // 播放中途退出，不下发游戏奖励
-            }
-        })
-      }
-    
-
-
+    // 在页面onLoad回调事件中创建激励视频广告实例
+    if (wx.createRewardedVideoAd) {
+      videoAd = wx.createRewardedVideoAd({
+        adUnitId: "adunit-fba5c4dd65498d8c",
+      });
+      videoAd.onLoad(() => {});
+      videoAd.onError((err) => {});
+      videoAd.onClose((res) => {
+        if (res && res.isEnded) {
+          this.downloadFile();
+        } else {
+          // 播放中途退出，不下发游戏奖励
+        }
+      });
+    }
   },
   methods: {
     preview(src) {
@@ -115,83 +116,93 @@ export default {
       });
     },
     download() {
-   
-    
+      Taro.showModal({
+        title: "提示",
+        content: "花几秒钟看完广告就能下载了哦",
+        success: function (res) {
+          if (res.confirm) {
+            console.log("用户点击确定");
 
-   
-      // 用户触发广告后，显示激励视频广告
-      if (videoAd) {
-        videoAd.show().catch(() => {
-          // 失败重试
-          videoAd.load()
-            .then(() => videoAd.show())
-            .catch(err => {
-              console.log('激励视频 广告显示失败')
-            })
-        })
-
-
-        
-      }
-      
+            // 用户触发广告后，显示激励视频广告
+            if (videoAd) {
+              videoAd.show().catch(() => {
+                // 失败重试
+                videoAd
+                  .load()
+                  .then(() => videoAd.show())
+                  .catch((err) => {
+                    console.log("激励视频 广告显示失败");
+                  });
+              });
+            }
+          } else if (res.cancel) {
+            console.log("用户点击取消");
+          }
+        },
+      });
     },
-    downloadFile(){
+    downloadFile() {
       wx.downloadFile({
-        url: this.info.link,//图片地址
+        url: this.info.link, //图片地址
         success: function (res) {
           //图片保存到本地
           wx.saveVideoToPhotosAlbum({
             filePath: res.tempFilePath,
             success: function (data) {
-              wx.hideLoading()
+              wx.hideLoading();
               wx.showModal({
-                title: '提示',
-                content: '视频文件已保存到相册',
+                title: "提示",
+                content: "视频文件已保存到相册",
                 showCancel: false,
-              })
+              });
             },
             fail: function (err) {
-              if (err.errMsg === "saveVideoToPhotosAlbum:fail:auth denied" || err.errMsg === "saveVideoToPhotosAlbum:fail auth deny" || err.errMsg === "saveVideoToPhotosAlbum:fail authorize no response") {
+              if (
+                err.errMsg === "saveVideoToPhotosAlbum:fail:auth denied" ||
+                err.errMsg === "saveVideoToPhotosAlbum:fail auth deny" ||
+                err.errMsg ===
+                  "saveVideoToPhotosAlbum:fail authorize no response"
+              ) {
                 // 这边微信做过调整，必须要在按钮中触发，因此需要在弹框回调中进行调用
                 wx.showModal({
-                  title: '提示',
-                  content: '需要您授权保存相册',
+                  title: "提示",
+                  content: "需要您授权保存相册",
                   showCancel: false,
-                  success: modalSuccess => {
+                  success: (modalSuccess) => {
                     wx.openSetting({
                       success(settingdata) {
-                        console.log("settingdata", settingdata)
-                        if (settingdata.authSetting['scope.writePhotosAlbum']) {
+                        console.log("settingdata", settingdata);
+                        if (settingdata.authSetting["scope.writePhotosAlbum"]) {
                           wx.showModal({
-                            title: '提示',
-                            content: '获取权限成功,再次点击即可保存',
+                            title: "提示",
+                            content: "获取权限成功,再次点击即可保存",
                             showCancel: false,
-                          })
+                          });
                         } else {
                           wx.showModal({
-                            title: '提示',
-                            content: '获取权限失败，将无法保存到相册哦~',
+                            title: "提示",
+                            content: "获取权限失败，将无法保存到相册哦~",
                             showCancel: false,
-                          })
+                          });
                         }
                       },
                       fail(failData) {
-                        console.log("failData", failData)
+                        console.log("failData", failData);
                       },
                       complete(finishData) {
-                        console.log("finishData", finishData)
-                      }
-                    })
-                  }
-                })
+                        console.log("finishData", finishData);
+                      },
+                    });
+                  },
+                });
               }
             },
             complete(res) {
-              wx.hideLoading()
-            }
-          })
-        }
-      })
+              wx.hideLoading();
+            },
+          });
+        },
+      });
     },
     getDetail(id) {
       Taro.request({
@@ -199,8 +210,8 @@ export default {
       }).then((res) => {
         if (res.data.success) {
           Taro.setNavigationBarTitle({
-              title: res.data.info.title
-          })
+            title: res.data.info.title,
+          });
           this.info = res.data.info;
           this.content = res.data.info.content.replace(
             /\<img/gi,
