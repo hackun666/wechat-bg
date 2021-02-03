@@ -8,10 +8,10 @@
             <image class="thumb" mode="aspectFill" :src="item.thumb" />
           </view>
             
-          <view class="ad_item" v-if="index == 0 || index == 6"> 
+          <view class="ad_item" v-if="index == 0 || index == 6 || index == 12 || index == 18"> 
             <ad unit-id="adunit-676cce9ac4d3b8bf"></ad>
           </view>
-          <view class="ad_item" v-if="index == 3 || index == 9">
+          <view class="ad_item" v-if="index == 3 || index == 9 || index == 15 || index == 20">
             <ad unit-id="adunit-3fb6b99d59fc7ec2" ad-type="video" ad-theme="white"></ad>
           </view>
         </view>
